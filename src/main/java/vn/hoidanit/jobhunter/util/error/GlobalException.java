@@ -19,25 +19,30 @@ import vn.hoidanit.jobhunter.domain.RestResponse;
 
 @RestControllerAdvice
 public class GlobalException {
-    @ExceptionHandler(value = { IdInvalidException.class, UsernameNotFoundException.class,
-            BadCredentialsException.class })
-    public ResponseEntity<RestResponse<Object>> handleIdException(IdInvalidException idException) {
-        RestResponse<Object> restResponse = new RestResponse<>();
-        restResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        restResponse.setError(idException.getMessage());
-        restResponse.setMessage("Exception occur");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(restResponse);
+    @ExceptionHandler(value = {
+            UsernameNotFoundException.class,
+            BadCredentialsException.class
+    })
+    public ResponseEntity<RestResponse<Object>> handleIdException(Exception ex) {
+        RestResponse<Object> res = new RestResponse<Object>();
+        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        res.setError(ex.getMessage());
+        res.setMessage("Exception occurs...");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<RestResponse<Object>> validationError(MethodArgumentNotValidException ex) {
         BindingResult result = ex.getBindingResult();
         final List<FieldError> fieldErrors = result.getFieldErrors();
-        RestResponse<Object> res = new RestResponse<>();
+
+        RestResponse<Object> res = new RestResponse<Object>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         res.setError(ex.getBody().getDetail());
+
         List<String> errors = fieldErrors.stream().map(f -> f.getDefaultMessage()).collect(Collectors.toList());
         res.setMessage(errors.size() > 1 ? errors : errors.get(0));
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 }
